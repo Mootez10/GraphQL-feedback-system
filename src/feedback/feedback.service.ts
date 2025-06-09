@@ -1,26 +1,29 @@
+// src/feedback/feedback.service.ts
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Feedback } from './feedback.entity';
 import { CreateFeedbackInput } from './dto/create-feedback.input';
+import { DeleteResult } from 'typeorm';
 
 @Injectable()
 export class FeedbackService {
-  private feedbacks: Feedback[] = [];
-  private idCounter = 1;
+  constructor(
+    @InjectRepository(Feedback)
+    private feedbackRepo: Repository<Feedback>,
+  ) {}
 
-  create(input: CreateFeedbackInput): Feedback {
-    const newFeedback = { id: this.idCounter++, ...input };
-    this.feedbacks.push(newFeedback);
-    return newFeedback;
+  create(input: CreateFeedbackInput): Promise<Feedback> {
+    const feedback = this.feedbackRepo.create(input);
+    return this.feedbackRepo.save(feedback);
   }
 
-  findAll(): Feedback[] {
-    return this.feedbacks;
+  findAll(): Promise<Feedback[]> {
+    return this.feedbackRepo.find();
   }
 
-  delete(id: number): boolean {
-  const index = this.feedbacks.findIndex(f => f.id === id);
-  if (index === -1) return false;
-  this.feedbacks.splice(index, 1);
-  return true;
+  async delete(id: number): Promise<boolean> {
+  const result: DeleteResult = await this.feedbackRepo.delete(id);
+  return (result.affected ?? 0) > 0;
 }
 }

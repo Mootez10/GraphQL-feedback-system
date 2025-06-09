@@ -1,34 +1,36 @@
+// src/product/product.service.ts
 import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { Product } from './product.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { UpdateProductInput } from './dto/update-product.input';
+import { DeleteResult } from 'typeorm';
 @Injectable()
 export class ProductService {
-  private products: Product[] = [];
-  private idCounter = 1;
+  constructor(
+    @InjectRepository(Product)
+    private productRepo: Repository<Product>,
+  ) {}
 
-  create(input: CreateProductInput): Product {
-    const newProduct = { id: this.idCounter++, ...input };
-    this.products.push(newProduct);
-    return newProduct;
+  create(input: CreateProductInput): Promise<Product> {
+    const product = this.productRepo.create(input);
+    return this.productRepo.save(product);
   }
 
-  findAll(): Product[] {
-    return this.products;
+  findAll(): Promise<Product[]> {
+    return this.productRepo.find();
   }
 
-  delete(id: number): boolean {
-    const index = this.products.findIndex(p => p.id === id);
-    if (index === -1) return false;
-    this.products.splice(index, 1);
-    return true;
+  async update(input: UpdateProductInput): Promise<Product | null> {
+    const product = await this.productRepo.findOneBy({ id: input.id });
+    if (!product) return null;
+    Object.assign(product, input);
+    return this.productRepo.save(product);
   }
 
-  update(input: UpdateProductInput): Product | null {
-  const product = this.products.find(p => p.id === input.id);
-  if (!product) return null;
-  Object.assign(product, input);
-  return product;
+  async delete(id: number): Promise<boolean> {
+  const result: DeleteResult = await this.productRepo.delete(id);
+  return (result.affected ?? 0) > 0;
 }
-
 }

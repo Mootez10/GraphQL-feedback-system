@@ -1,7 +1,7 @@
 import { Resolver, Query, Mutation, Args } from '@nestjs/graphql';
 import { FeedbackService } from './feedback.service';
 import { Feedback } from './feedback.entity';
-import { CreateFeedbackInput } from './dto/create-feedback.input';
+import { CreateFeedbackInput } from '././dto/create-feedback.input';
 import { ObjectType, Field, Int } from '@nestjs/graphql';
 import { GraphQLBoolean } from 'graphql';
 
@@ -37,8 +37,8 @@ export class FeedbackResolver {
     return this.feedbackService.create(input);
   }
 
-  @Mutation(() => GraphQLBoolean)
-deleteFeedback(@Args('id', { type: () => Int }) id: number): boolean {
+ @Mutation(() => GraphQLBoolean)
+async deleteFeedback(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
   return this.feedbackService.delete(id);
 }
 }

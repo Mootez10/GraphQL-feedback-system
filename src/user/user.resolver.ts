@@ -4,6 +4,7 @@ import { User } from './user.entity';
 import { CreateUserInput } from './dto/create-user.input';
 import { GraphQLBoolean } from 'graphql';
 import { UpdateUserInput } from './dto/update-user.input';
+
 @Resolver(() => User)
 export class UserResolver {
   constructor(private userService: UserService) {}
@@ -19,11 +20,15 @@ export class UserResolver {
   }
 
   @Mutation(() => GraphQLBoolean)
-  deleteUser(@Args('id', { type: () => Int }) id: number) {
+  async deleteUser(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
     return this.userService.delete(id);
   }
-  @Mutation(() => User, { nullable: true })
+
+  
+
+@Mutation(() => User, { nullable: true })
 updateUser(@Args('input') input: UpdateUserInput) {
   return this.userService.update(input);
 }
+
 }

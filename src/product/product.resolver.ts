@@ -4,6 +4,7 @@ import { Product } from './product.entity';
 import { CreateProductInput } from './dto/create-product.input';
 import { GraphQLBoolean } from 'graphql';
 import { UpdateProductInput } from './dto/update-product.input';
+
 @Resolver(() => Product)
 export class ProductResolver {
   constructor(private productService: ProductService) {}
@@ -19,9 +20,10 @@ export class ProductResolver {
   }
 
   @Mutation(() => GraphQLBoolean)
-  deleteProduct(@Args('id', { type: () => Int }) id: number) {
+  async deleteProduct(@Args('id', { type: () => Int }) id: number): Promise<boolean> {
     return this.productService.delete(id);
   }
+
   @Mutation(() => Product, { nullable: true })
 updateProduct(@Args('input') input: UpdateProductInput) {
   return this.productService.update(input);
